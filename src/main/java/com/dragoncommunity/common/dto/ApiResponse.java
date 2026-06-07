@@ -1,10 +1,12 @@
 package com.dragoncommunity.common.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
+@Builder
 public class ApiResponse<T> {
 
     private final String message;
