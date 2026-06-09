@@ -17,8 +17,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 
-import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.PASSWORD_PASSWORD_CONFIRM_MISMATCH;
-import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.USER_DUPLICATE_EMAIL;
+import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.*;
 
 @Service
 @Validated
@@ -31,6 +30,10 @@ public class UsersService {
     public void signUp(@Valid SignUpRequestDto signUpRequestDto) {
         if (usersRepository.existsByEmail(signUpRequestDto.getEmail())) {
             throw new ApplicationException(USER_DUPLICATE_EMAIL);
+        }
+
+        if (usersRepository.existsByNickname(signUpRequestDto.getEmail())) {
+            throw new ApplicationException(USER_DUPLICATE_NICKNAME);
         }
 
         if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getPasswordConfirm())) {
@@ -51,6 +54,7 @@ public class UsersService {
         usersRepository.save(users);
     }
 
+    // TODO : 해당 API는 비회원이 DB에 쉽게 접근할 수 있기 때문에 캐싱이 필요함.
     public ApiResponse<AvailabilityResponseDto> emailAvailability(@Valid EmailAvailabilityRequestDto emailAvailabilityRequestDto) {
 
         if (usersRepository.existsByEmail(emailAvailabilityRequestDto.getEmail())) {
@@ -69,6 +73,7 @@ public class UsersService {
         return ApiResponse.of("사용 가능한 이메일입니다.", emailAvailabilityResponseDto);
     }
 
+    // TODO : 해당 API는 비회원이 DB에 쉽게 접근할 수 있기 때문에 캐싱이 필요함.
     public ApiResponse<AvailabilityResponseDto> nicknameAvailability(@Valid NicknameAvailabilityRequestDto emailAvailabilityRequestDto) {
 
         if (usersRepository.existsByEmail(emailAvailabilityRequestDto.getNickname())) {
