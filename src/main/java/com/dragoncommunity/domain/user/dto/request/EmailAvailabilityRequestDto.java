@@ -1,13 +1,14 @@
 package com.dragoncommunity.domain.user.dto.request;
 
 
+import com.dragoncommunity.domain.user.constant.ValidationMessage;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
 @Getter
 public class EmailAvailabilityRequestDto {
-    @NotBlank
-    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
+    @NotBlank(message = ValidationMessage.EMAIL_NOT_BLANK)
+    @Email(message = ValidationMessage.EMAIL_PATTERN_NOT_AVAILABILITY)
     private String email;
 }

@@ -18,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import java.time.LocalDateTime;
 
 import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.*;
+import static com.dragoncommunity.domain.user.constant.UsersServiceMessage.*;
 
 @Service
 @Validated
@@ -42,7 +43,6 @@ public class UsersService {
 
         LocalDateTime now = LocalDateTime.now();
         String encodedPassword = passwordEncoder.encode(signUpRequestDto.getPassword());
-
         Users users = Users.builder()
                 .email(signUpRequestDto.getEmail())
                 .nickname(signUpRequestDto.getNickname())
@@ -63,14 +63,14 @@ public class UsersService {
                     .availability(false)
                     .build();
 
-            return ApiResponse.of("이미 사용중인 이메일입니다.", emailAvailabilityResponseDto);
+            return ApiResponse.of(EMAIL_NOT_AVAILABLE, emailAvailabilityResponseDto);
         }
 
         AvailabilityResponseDto emailAvailabilityResponseDto = AvailabilityResponseDto.builder()
                 .availability(true)
                 .build();
 
-        return ApiResponse.of("사용 가능한 이메일입니다.", emailAvailabilityResponseDto);
+        return ApiResponse.of(EMAIL_AVAILABLE, emailAvailabilityResponseDto);
     }
 
     // TODO : 해당 API는 비회원이 DB에 쉽게 접근할 수 있기 때문에 캐싱이 필요함.
@@ -82,14 +82,14 @@ public class UsersService {
                     .availability(false)
                     .build();
 
-            return ApiResponse.of("이미 사용중인 닉네임입니다.", nicknameAvailabilityResponseDto);
+            return ApiResponse.of(NICKNAME_NOT_AVAILABLE, nicknameAvailabilityResponseDto);
         }
 
         AvailabilityResponseDto nicknameAvailabilityResponseDto = AvailabilityResponseDto.builder()
                 .availability(true)
                 .build();
 
-        return ApiResponse.of("사용 가능한 닉네임입니다.", nicknameAvailabilityResponseDto);
+        return ApiResponse.of(NICKNAME_AVAILABLE, nicknameAvailabilityResponseDto);
     }
 
 }
