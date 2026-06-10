@@ -6,9 +6,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
-@Getter
-public class EmailAvailabilityRequestDto {
-    @NotBlank(message = ValidationMessage.EMAIL_NOT_BLANK)
-    @Email(message = ValidationMessage.EMAIL_PATTERN_NOT_AVAILABILITY)
-    private String email;
+public record EmailAvailabilityRequestDto(
+        @NotBlank(message = ValidationMessage.EMAIL_NOT_BLANK)
+        @Email(message = ValidationMessage.EMAIL_PATTERN_NOT_AVAILABILITY)
+        String email
+) {
 }

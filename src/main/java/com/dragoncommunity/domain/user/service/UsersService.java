@@ -29,23 +29,23 @@ public class UsersService {
 
     @Transactional
     public void signUp(@Valid SignUpRequestDto signUpRequestDto) {
-        if (usersRepository.existsByEmail(signUpRequestDto.getEmail())) {
+        if (usersRepository.existsByEmail(signUpRequestDto.email())) {
             throw new ApplicationException(USER_DUPLICATE_EMAIL);
         }
 
-        if (usersRepository.existsByNickname(signUpRequestDto.getEmail())) {
+        if (usersRepository.existsByNickname(signUpRequestDto.email())) {
             throw new ApplicationException(USER_DUPLICATE_NICKNAME);
         }
 
-        if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getPasswordConfirm())) {
+        if (!signUpRequestDto.password().equals(signUpRequestDto.passwordConfirm())) {
             throw new ApplicationException(PASSWORD_PASSWORD_CONFIRM_MISMATCH);
         }
 
         LocalDateTime now = LocalDateTime.now();
-        String encodedPassword = passwordEncoder.encode(signUpRequestDto.getPassword());
+        String encodedPassword = passwordEncoder.encode(signUpRequestDto.password());
         Users users = Users.builder()
-                .email(signUpRequestDto.getEmail())
-                .nickname(signUpRequestDto.getNickname())
+                .email(signUpRequestDto.email())
+                .nickname(signUpRequestDto.nickname())
                 .password(encodedPassword)
                 .createdAt(now)
                 .updatedAt(now)
@@ -57,39 +57,21 @@ public class UsersService {
     // TODO : 해당 API는 비회원이 DB에 쉽게 접근할 수 있기 때문에 캐싱이 필요함.
     public ApiResponse<AvailabilityResponseDto> emailAvailability(@Valid EmailAvailabilityRequestDto emailAvailabilityRequestDto) {
 
-        if (usersRepository.existsByEmail(emailAvailabilityRequestDto.getEmail())) {
-
-            AvailabilityResponseDto emailAvailabilityResponseDto = AvailabilityResponseDto.builder()
-                    .availability(false)
-                    .build();
-
-            return ApiResponse.of(EMAIL_NOT_AVAILABLE, emailAvailabilityResponseDto);
+        if (usersRepository.existsByEmail(emailAvailabilityRequestDto.email())) {
+            return ApiResponse.of(EMAIL_NOT_AVAILABLE, AvailabilityResponseDto.of(false));
         }
 
-        AvailabilityResponseDto emailAvailabilityResponseDto = AvailabilityResponseDto.builder()
-                .availability(true)
-                .build();
-
-        return ApiResponse.of(EMAIL_AVAILABLE, emailAvailabilityResponseDto);
+        return ApiResponse.of(EMAIL_AVAILABLE, AvailabilityResponseDto.of(true));
     }
 
     // TODO : 해당 API는 비회원이 DB에 쉽게 접근할 수 있기 때문에 캐싱이 필요함.
     public ApiResponse<AvailabilityResponseDto> nicknameAvailability(@Valid NicknameAvailabilityRequestDto emailAvailabilityRequestDto) {
 
-        if (usersRepository.existsByEmail(emailAvailabilityRequestDto.getNickname())) {
-
-            AvailabilityResponseDto nicknameAvailabilityResponseDto = AvailabilityResponseDto.builder()
-                    .availability(false)
-                    .build();
-
-            return ApiResponse.of(NICKNAME_NOT_AVAILABLE, nicknameAvailabilityResponseDto);
+        if (usersRepository.existsByEmail(emailAvailabilityRequestDto.nickname())) {
+            return ApiResponse.of(NICKNAME_NOT_AVAILABLE, AvailabilityResponseDto.of(false));
         }
 
-        AvailabilityResponseDto nicknameAvailabilityResponseDto = AvailabilityResponseDto.builder()
-                .availability(true)
-                .build();
-
-        return ApiResponse.of(NICKNAME_AVAILABLE, nicknameAvailabilityResponseDto);
+        return ApiResponse.of(NICKNAME_AVAILABLE, AvailabilityResponseDto.of(true));
     }
 
 }
