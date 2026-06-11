@@ -2,7 +2,6 @@ package com.dragoncommunity.common.exception;
 
 import com.dragoncommunity.common.dto.ApiResponse;
 import com.dragoncommunity.common.dto.FieldNotValidResponseDto;
-import com.dragoncommunity.common.exception.enums.GlobalErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import static com.dragoncommunity.common.exception.enums.GlobalErrorCode.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,27 +35,27 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameter() {
-        return createErrorResponse(GlobalErrorCode.MISSING_INPUT_VALUE);
+        return createErrorResponse(MISSING_INPUT_VALUE);
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleHttpMediaTypeNotSupported() {
-        return createErrorResponse(GlobalErrorCode.UNSUPPORTED_MEDIA_TYPE);
+        return createErrorResponse(UNSUPPORTED_MEDIA_TYPE);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFound() {
-        return createErrorResponse(GlobalErrorCode.RESOURCE_NOT_FOUND);
+        return createErrorResponse(RESOURCE_NOT_FOUND);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoHandlerFound() {
-        return createErrorResponse(GlobalErrorCode.PATH_NOT_FOUND);
+        return createErrorResponse(PATH_NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAllUncaughtException() {
-        return createErrorResponse(GlobalErrorCode.INTERNAL_SERVER_ERROR);
+        return createErrorResponse(INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ApiResponse<Void>> createErrorResponse(ErrorCode errorCode) {
