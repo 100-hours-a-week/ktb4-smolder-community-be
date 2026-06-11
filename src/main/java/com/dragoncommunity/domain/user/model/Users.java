@@ -1,16 +1,14 @@
 package com.dragoncommunity.domain.user.model;
 
-import com.dragoncommunity.common.model.BaseTimeEntity;
+import com.dragoncommunity.common.model.SoftDeleteEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
+
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@SuperBuilder
-public class Users extends BaseTimeEntity {
+public class Users extends SoftDeleteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -24,4 +22,19 @@ public class Users extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String password;
+
+    private Users(String email, String nickname, String password) {
+        this.email = email;
+        this.nickname = nickname;
+        this.password = password;
+    }
+
+    public static Users createUser(String email, String nickname, String password) {
+        return new Users(
+                email,
+                nickname,
+                password
+        );
+    }
+
 }

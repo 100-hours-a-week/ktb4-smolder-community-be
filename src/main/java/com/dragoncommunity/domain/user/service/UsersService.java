@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.time.LocalDateTime;
 
 import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.*;
 import static com.dragoncommunity.domain.user.constant.UsersServiceMessage.*;
@@ -41,15 +40,12 @@ public class UsersService {
             throw new ApplicationException(PASSWORD_PASSWORD_CONFIRM_MISMATCH);
         }
 
-        LocalDateTime now = LocalDateTime.now();
         String encodedPassword = passwordEncoder.encode(signUpRequestDto.password());
-        Users users = Users.builder()
-                .email(signUpRequestDto.email())
-                .nickname(signUpRequestDto.nickname())
-                .password(encodedPassword)
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+
+        Users users = Users.createUser(
+                signUpRequestDto.email(),
+                signUpRequestDto.nickname(),
+                encodedPassword);
 
         usersRepository.save(users);
     }
