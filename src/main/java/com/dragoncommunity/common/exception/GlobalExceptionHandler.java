@@ -1,7 +1,9 @@
 package com.dragoncommunity.common.exception;
 
 import com.dragoncommunity.common.dto.ApiResponse;
+import com.dragoncommunity.common.dto.FieldNotValidResponseDto;
 import com.dragoncommunity.common.exception.enums.GlobalErrorCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,8 +22,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid() {
-        return createErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE);
+    public ResponseEntity<ApiResponse<FieldNotValidResponseDto>> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        String field = e.getBindingResult().getFieldErrors().get(0).getField();
+
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.of(errorMessage,FieldNotValidResponseDto.of(field)));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
