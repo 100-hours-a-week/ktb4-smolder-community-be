@@ -1,6 +1,7 @@
 package com.dragoncommunity.infrastructure.storage;
 
 import com.dragoncommunity.common.exception.ApplicationException;
+import com.dragoncommunity.common.util.FileUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import static com.dragoncommunity.common.config.constant.FileConfigConstant.*;
+import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.FILE_NOT_EXISTS;
 import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.FILE_UPLOAD_FAILED;
 
 @Component
@@ -38,6 +40,21 @@ public class LocalFileManager implements FileManager {
         }
 
         return PROFILE_URL + filename;
+    }
+
+    /**
+     * 프로필 이미지가 Storage에 있는지 확인한다.
+     */
+    @Override
+    public void validateProfileImageExists(String profileImageUrl) {
+
+        String fileName = FileUtil.extractFileNameFromPath(profileImageUrl,PROFILE_URL);
+
+        Path filePath = PROFILE_DIR.resolve(fileName);
+
+        if (!Files.isRegularFile(filePath)) {
+            throw new ApplicationException(FILE_NOT_EXISTS);
+        }
     }
 
     /**

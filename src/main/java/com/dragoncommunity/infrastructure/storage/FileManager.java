@@ -4,4 +4,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface FileManager {
     String profileImageUpload(MultipartFile file);
+
+    void validateProfileImageExists(String profileImageUrl);
 }
