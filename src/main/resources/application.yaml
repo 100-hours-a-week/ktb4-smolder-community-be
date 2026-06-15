@@ -17,6 +17,12 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
+
+jwt:
+  access-token-expired-seconds: 3600
+  refresh-token-expired-seconds: 604800000
+  secret: ${JWT_SECRET}
