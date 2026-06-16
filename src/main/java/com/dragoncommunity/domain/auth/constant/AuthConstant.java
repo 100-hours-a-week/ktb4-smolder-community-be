@@ -3,7 +3,9 @@ package com.dragoncommunity.domain.auth.constant;
 public final class AuthConstant {
     public static final String[] WHITE_LIST = {
             "/auth",
-            "/users",
+            "/user",
+            "/image",
+            "/public/profile/**",
     };
 
     public static final Long DEVICE_ID_COOKIE_AGE = (long) (60 * 60 * 24 * 365);
