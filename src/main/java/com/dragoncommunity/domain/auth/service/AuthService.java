@@ -12,6 +12,7 @@ import com.dragoncommunity.domain.auth.repository.RefreshTokensRepository;
 import com.dragoncommunity.domain.user.model.Users;
 import com.dragoncommunity.domain.user.repository.UsersImagesRepository;
 import com.dragoncommunity.domain.user.repository.UsersRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,7 @@ public class AuthService {
      * 7. DB에 저장
      */
     @Transactional
-    public SignInResultDto createAuthToken(SignInRequestDto signInRequestDto) {
+    public SignInResultDto createAuthToken(@Valid SignInRequestDto signInRequestDto) {
         Users user = usersRepository.findByEmail(signInRequestDto.email())
                 .orElseThrow(() -> new ApplicationException(AUTH_INVALID_CREDENTIALS));
 
@@ -107,12 +108,8 @@ public class AuthService {
      * 6. 새 리프레시 토큰 DB에 저장
      */
     @Transactional
-    public ReissueTokenResult reissueAuthToken(ReissueTokenRequestDto reissueTokenRequestDto) {
+    public ReissueTokenResult reissueAuthToken(@Valid ReissueTokenRequestDto reissueTokenRequestDto) {
         jwtProvider.parse(reissueTokenRequestDto.refreshToken());
-
-        if(reissueTokenRequestDto.refreshToken()==null){
-            throw new ApplicationException(AUTHORIZATION_HEADER_MISSING_OR_INVALID);
-        }
 
         RefreshTokens savedRefreshToken = refreshTokensRepository
                 .findByRefreshToken(reissueTokenRequestDto.refreshToken());
