@@ -2,10 +2,8 @@ package com.dragoncommunity.domain.auth.service;
 
 import com.dragoncommunity.common.exception.ApplicationException;
 import com.dragoncommunity.common.security.util.PasswordEncoder;
-import com.dragoncommunity.domain.auth.dto.RefreshTokenInfoDto;
-import com.dragoncommunity.domain.auth.dto.SignInResultDto;
-import com.dragoncommunity.domain.auth.dto.AccessTokenInfoDto;
-import com.dragoncommunity.domain.auth.dto.UserInfoDto;
+import com.dragoncommunity.domain.auth.dto.*;
+import com.dragoncommunity.domain.auth.dto.request.ReissueTokenRequestDto;
 import com.dragoncommunity.domain.auth.dto.request.SignInRequestDto;
 import com.dragoncommunity.domain.auth.dto.response.SignInResponseDto;
 import com.dragoncommunity.domain.auth.jwt.JwtProvider;
@@ -23,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.AUTH_INVALID_CREDENTIALS;
+import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +34,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
 
     /**
-     * 로그인 기능 구현
+     * 인증 토큰 생성(로그인) 기능 구현
      * 1. 이메일 존재 확인
      * 2. 비밀번호 확인
      * 3. 프로필 이미지 존재 확인
@@ -47,7 +45,7 @@ public class AuthService {
      * 7. DB에 저장
      */
     @Transactional
-    public SignInResultDto signIn(SignInRequestDto signInRequestDto) {
+    public SignInResultDto createAuthToken(SignInRequestDto signInRequestDto) {
         Users user = usersRepository.findByEmail(signInRequestDto.email())
                 .orElseThrow(() -> new ApplicationException(AUTH_INVALID_CREDENTIALS));
 
@@ -69,12 +67,7 @@ public class AuthService {
 
         LocalDateTime refreshTokenExpiredAt = jwtProvider.getExpiration(refreshToken);
 
-        List<RefreshTokens> tokens = refreshTokensRepository.findByUserOrderByCreatedAtAsc(user);
-
-        if (tokens.size() >= 5) {
-            RefreshTokens oldest = tokens.get(0);
-            refreshTokensRepository.delete(oldest);
-        }
+        clearOldestSessionIfExceeded(user);
 
         String deviceId = generateDeviceId();
 
@@ -102,8 +95,83 @@ public class AuthService {
         );
     }
 
+    /**
+     * 토큰 재발행
+     * 1. 리프레시 토큰 검증
+     * 2. 리프레시 토큰을 DB에서 가져온다.
+     *  2-1. 없다면, 해당 토큰은 탈취 가능성이 있으므로 해당 토큰으로 발행된(device id로 조회)리프레시 토큰 삭제 후 에러 처리
+     *  2-2. 클라이언트의 device id 쿠키의 값과 DB의 device id 값이 다른 경우 비정상이므로 삭제 후 에러 처리
+     * 3. 새 엑세스 토큰 생성
+     * 4. 새 리프레시 토큰 생성
+     * 5. DB에 있는 기존 리프레시 토큰 삭제
+     * 6. 새 리프레시 토큰 DB에 저장
+     */
+    @Transactional
+    public ReissueTokenResult reissueAuthToken(ReissueTokenRequestDto reissueTokenRequestDto) {
+        jwtProvider.parse(reissueTokenRequestDto.refreshToken());
+
+        if(reissueTokenRequestDto.refreshToken()==null){
+            throw new ApplicationException(AUTHORIZATION_HEADER_MISSING_OR_INVALID);
+        }
+
+        RefreshTokens savedRefreshToken = refreshTokensRepository
+                .findByRefreshToken(reissueTokenRequestDto.refreshToken());
+
+        if (savedRefreshToken == null){
+            refreshTokensRepository.deleteByDeviceId(reissueTokenRequestDto.deviceId());
+            throw new ApplicationException(AUTHORIZATION_HEADER_MISSING_OR_INVALID);
+        }
+
+        if(!savedRefreshToken.getDeviceId().equals(reissueTokenRequestDto.deviceId())) {
+            refreshTokensRepository.deleteByRefreshToken(reissueTokenRequestDto.refreshToken());
+            throw new ApplicationException(AUTHORIZATION_HEADER_MISSING_OR_INVALID);
+        }
+
+        Users user= savedRefreshToken.getUser();
+
+
+        String newAccessToken = jwtProvider.createAccessToken(
+                user.getUserId(),
+                user.getEmail(),
+                user.getNickname()
+        );
+
+        String newRefreshToken = jwtProvider.createRefreshToken(user.getUserId());
+
+        LocalDateTime refreshTokenExpiredAt = jwtProvider.getExpiration(newRefreshToken);
+
+        refreshTokensRepository.delete(savedRefreshToken);
+        refreshTokensRepository.save(
+                RefreshTokens.createRefreshToken(
+                        newRefreshToken,
+                        reissueTokenRequestDto.deviceId(),
+                        refreshTokenExpiredAt,
+                        user
+                )
+        );
+
+        return ReissueTokenResult.of(
+                AccessTokenInfoDto.of(
+                        newAccessToken,jwtProvider.getAccessTokenValidityInMilliseconds()
+                ),
+                RefreshTokenInfoDto.of(
+                        newRefreshToken, reissueTokenRequestDto.deviceId()
+                )
+        );
+    }
+
+
     private String generateDeviceId() {
         return UUID.randomUUID().toString();
+    }
+
+    private void clearOldestSessionIfExceeded(Users user){
+        List<RefreshTokens> tokens = refreshTokensRepository.findByUserOrderByCreatedAtAsc(user);
+
+        if (tokens.size() >= 5) {
+            RefreshTokens oldest = tokens.get(0);
+            refreshTokensRepository.delete(oldest);
+        }
     }
 
 }
