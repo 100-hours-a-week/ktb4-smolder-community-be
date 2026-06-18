@@ -4,7 +4,10 @@ import com.dragoncommunity.common.exception.ApplicationException;
 import com.dragoncommunity.common.util.FileUtil;
 import com.dragoncommunity.domain.image.model.Images;
 import com.dragoncommunity.domain.image.repository.ImagesRepository;
+import com.dragoncommunity.domain.post.dto.PostInfoDto;
 import com.dragoncommunity.domain.post.dto.request.CreatePostRequestDto;
+import com.dragoncommunity.domain.post.dto.request.GetPostsRequestDto;
+import com.dragoncommunity.domain.post.dto.response.GetPostResponseDto;
 import com.dragoncommunity.domain.post.model.Posts;
 import com.dragoncommunity.domain.post.model.PostsImages;
 import com.dragoncommunity.domain.post.model.PostsStats;
@@ -16,11 +19,17 @@ import com.dragoncommunity.domain.user.repository.UsersRepository;
 import com.dragoncommunity.infrastructure.storage.FileManager;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
+
 import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.*;
+import static com.dragoncommunity.domain.post.constant.PostConstant.DEFAULT_POST_GET_SIZE;
 
 @Service
 @RequiredArgsConstructor
@@ -74,6 +83,33 @@ public class PostsService {
         }
 
         postsStatsRepository.save(PostsStats.createPostsStats(post));
+    }
+
+    /**
+     * 게시글 조회 서비스
+     * 마지막 본 게시글의 ID 이후 10개의 게시글을 조회한다.
+     * 1. 조회할 게시글의 버퍼 개수 설정
+     * 2. 조회 쿼리 실행
+     * 2-1. 쿼리파라미터가 없다면 가장 최근 게시글 10개 조회
+     * 2-2. 쿼리파라미터가 있다면 해당 ID 이후 10개 조회
+     */
+    public GetPostResponseDto getPosts(GetPostsRequestDto getPostsRequestDto){
+        Pageable pageable = PageRequest.of(0, DEFAULT_POST_GET_SIZE);
+
+        Slice<PostInfoDto> sliceResult;
+
+        if (getPostsRequestDto.lastSeenId() == null) {
+            sliceResult = postsRepository.findFirstPage(pageable);
+        } else {
+            sliceResult = postsRepository.findNextPage(getPostsRequestDto.lastSeenId(), pageable);
+        }
+
+        List<PostInfoDto> contents = sliceResult.getContent();
+        boolean hasNext = sliceResult.hasNext();
+
+        Long nextCursorId = contents.isEmpty() ? null : contents.get(contents.size() - 1).postId();
+
+        return GetPostResponseDto.of(contents, nextCursorId, hasNext);
     }
 
 }
