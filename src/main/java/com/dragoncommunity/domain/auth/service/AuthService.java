@@ -3,6 +3,7 @@ package com.dragoncommunity.domain.auth.service;
 import com.dragoncommunity.common.exception.ApplicationException;
 import com.dragoncommunity.common.security.util.PasswordEncoder;
 import com.dragoncommunity.domain.auth.dto.*;
+import com.dragoncommunity.domain.auth.dto.request.DeleteAuthTokenRequestDto;
 import com.dragoncommunity.domain.auth.dto.request.ReissueTokenRequestDto;
 import com.dragoncommunity.domain.auth.dto.request.SignInRequestDto;
 import com.dragoncommunity.domain.auth.dto.response.SignInResponseDto;
@@ -155,6 +156,17 @@ public class AuthService {
                         newRefreshToken, reissueTokenRequestDto.deviceId()
                 )
         );
+    }
+
+    /**
+     * 로그아웃
+     * 1. DB 에서 RefreshToken 삭제
+     */
+    public void deleteAuthToken(@Valid DeleteAuthTokenRequestDto deleteAuthTokenRequestDto){
+        RefreshTokens savedRefreshToken = refreshTokensRepository
+                .findByRefreshToken(deleteAuthTokenRequestDto.refreshToken());
+
+        refreshTokensRepository.delete(savedRefreshToken);
     }
 
 

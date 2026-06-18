@@ -4,6 +4,7 @@ import com.dragoncommunity.common.dto.ApiResponse;
 import com.dragoncommunity.domain.auth.dto.AccessTokenInfoDto;
 import com.dragoncommunity.domain.auth.dto.ReissueTokenResult;
 import com.dragoncommunity.domain.auth.dto.SignInResultDto;
+import com.dragoncommunity.domain.auth.dto.request.DeleteAuthTokenRequestDto;
 import com.dragoncommunity.domain.auth.dto.request.ReissueTokenRequestDto;
 import com.dragoncommunity.domain.auth.dto.request.SignInRequestDto;
 import com.dragoncommunity.domain.auth.dto.response.SignInResponseDto;
@@ -16,8 +17,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 
 import static com.dragoncommunity.domain.auth.constant.AuthConstant.*;
-import static com.dragoncommunity.domain.auth.constant.SuccessMessage.SIGN_IN_SUCCESS;
-import static com.dragoncommunity.domain.auth.constant.SuccessMessage.TOKEN_REISSUE_SUCCESS;
+import static com.dragoncommunity.domain.auth.constant.SuccessMessage.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -65,6 +65,25 @@ public class AuthController {
                 reissueTokenResult.refreshTokenInfoDto().deviceId(), DEVICE_ID_COOKIE_AGE);
 
         return ApiResponse.of(TOKEN_REISSUE_SUCCESS, reissueTokenResult.accessTokenInfoDto());
+    }
+
+    /**
+     * 로그아웃
+     * 1. DB 에서 토큰 삭제
+     * 2. 쿠키값 삭제
+     */
+    @DeleteMapping
+    public ApiResponse<Void> deleteAuth(
+            @CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false)
+            String refreshToken,
+            HttpServletResponse httpServletResponse){
+
+        authService.deleteAuthToken(DeleteAuthTokenRequestDto.of(refreshToken));
+
+        addHttpOnlyCookie(httpServletResponse, REFRESH_TOKEN_COOKIE_NAME, null, 0);
+        addHttpOnlyCookie(httpServletResponse, DEVICE_ID_COOKIE_NAME, null, 0);
+
+        return ApiResponse.of(SIGN_OUT_SUCCESS);
     }
 
     private void addHttpOnlyCookie(HttpServletResponse response, String name, String value, long maxAge) {
