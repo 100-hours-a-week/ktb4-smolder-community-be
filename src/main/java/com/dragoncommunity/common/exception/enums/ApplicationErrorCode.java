@@ -17,7 +17,8 @@ public enum ApplicationErrorCode implements ErrorCode {
     PROFILE_IMAGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR,"업로드된 프로필 이미지가 존재하지 않습니다."),
     AUTHORIZATION_HEADER_MISSING_OR_INVALID(HttpStatus.UNAUTHORIZED,"인증 정보가 없거나 형식이 올바르지 않습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED,"인증 정보가 올바르지 않습니다."),
-    AUTH_INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED,"아이디 또는 비밀번호가 올바르지 않습니다.");
+    AUTH_INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED,"아이디 또는 비밀번호가 올바르지 않습니다."),
+    USER_NOT_EXIST(HttpStatus.UNAUTHORIZED,"유저 정보가 존재하지 않습니다.")
     ;
 
     private final HttpStatus httpStatus;
