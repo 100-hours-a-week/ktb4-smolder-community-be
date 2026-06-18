@@ -27,4 +27,16 @@ public class ImagesService {
 
         return imagesRepository.save(Images.createImage(profileUrl));
     }
+
+    /**
+     * 게시글 이미지 업로드
+     * 1.파일을 Storage에 저장하고
+     * 2.이미지 테이블에 파일 관련 데이터 생성
+     * TODO : 배치 처리로 고아 파일 및 칼럼 삭제
+     */
+    public Images createPostImage(MultipartFile file) {
+        String postImageUrl = fileManager.postImageUpload(file);
+
+        return imagesRepository.save(Images.createImage(postImageUrl));
+    }
 }

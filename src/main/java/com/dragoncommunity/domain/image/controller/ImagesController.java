@@ -2,6 +2,7 @@ package com.dragoncommunity.domain.image.controller;
 
 import com.dragoncommunity.common.dto.ApiResponse;
 import com.dragoncommunity.common.exception.ApplicationException;
+import com.dragoncommunity.domain.image.dto.response.PostImageUploadResponseDto;
 import com.dragoncommunity.domain.image.dto.response.ProfileUploadResponseDto;
 import com.dragoncommunity.domain.image.service.ImagesService;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,17 @@ public class ImagesController {
 
     private final ImagesService imagesService;
 
+    @PostMapping("/post")
+    public ApiResponse<PostImageUploadResponseDto> createPostImage(@RequestParam("file") MultipartFile file) {
+        imageAvailabilityCheck(file);
+
+        return ApiResponse.of(
+                FILE_UPLOAD_SUCCESS,
+                PostImageUploadResponseDto.from(imagesService.createPostImage(file)));
+    }
+
     @PostMapping
-    public ApiResponse<ProfileUploadResponseDto> createImage(@RequestParam("file") MultipartFile file) {
+    public ApiResponse<ProfileUploadResponseDto> createProfileImage(@RequestParam("file") MultipartFile file) {
         imageAvailabilityCheck(file);
 
         return ApiResponse.of(

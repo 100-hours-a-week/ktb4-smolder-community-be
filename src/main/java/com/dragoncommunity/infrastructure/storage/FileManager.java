@@ -6,4 +6,8 @@ public interface FileManager {
     String profileImageUpload(MultipartFile file);
 
     void validateProfileImageExists(String profileImageUrl);
+
+    String postImageUpload(MultipartFile file);
+
+    void validatePostImageExists(String profileImageUrl);
 }

@@ -21,6 +21,11 @@ public final class FileConfigConstant {
 
     public static final long MAX_PROFILE_SIZE = 10 * 1024 * 1024;
 
+    public static final String POST_IMAGE_URL = "/public/post/";
+    public static final String POST_IMAGE_PREFIX = "post";
+
+    public static final Path POST_IMAGE_DIR = UPLOAD_FOLDER.resolve("post");
+
     private FileConfigConstant() {
     }
 
