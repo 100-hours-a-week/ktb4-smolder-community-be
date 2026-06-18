@@ -58,6 +58,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
+            Long userId = jwtProvider.getUserId(token);
+            request.setAttribute("userId", userId);
+
             filterChain.doFilter(request, response);
 
         } catch (Exception exception) {
