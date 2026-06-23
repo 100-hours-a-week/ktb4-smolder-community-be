@@ -22,9 +22,8 @@ public enum ApplicationErrorCode implements ErrorCode {
     POST_NOT_EXIST(HttpStatus.BAD_REQUEST,"게시글 정보가 존재하지 않습니다."),
     UNAUTHORIZED_RESOURCE(HttpStatus.UNAUTHORIZED,"접근 권한이 없습니다."),
     FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"파일 삭제를 실패했습니다."),
-    POST_IMAGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR,"업로드된 게시글 이미지가 존재하지 않습니다.")
-
-    ;
+    POST_IMAGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR,"업로드된 게시글 이미지가 존재하지 않습니다."),
+    POST_INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"게시글을 불러오던 중 오류가 발생하였습니다." );
     private final HttpStatus httpStatus;
     private final String message;
 }

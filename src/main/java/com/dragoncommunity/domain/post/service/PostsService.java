@@ -8,6 +8,7 @@ import com.dragoncommunity.domain.post.dto.PostInfoDto;
 import com.dragoncommunity.domain.post.dto.request.CreatePostRequestDto;
 import com.dragoncommunity.domain.post.dto.request.GetPostsRequestDto;
 import com.dragoncommunity.domain.post.dto.request.ModifyPostRequestDto;
+import com.dragoncommunity.domain.post.dto.response.GetPostDetailResponseDto;
 import com.dragoncommunity.domain.post.dto.response.GetPostResponseDto;
 import com.dragoncommunity.domain.post.model.Posts;
 import com.dragoncommunity.domain.post.model.PostsImages;
@@ -204,4 +205,11 @@ public class PostsService {
 
     }
 
+    /**
+     * 게시글 상세 조회 서비스
+     */
+    public GetPostDetailResponseDto getPostDetail(Long postId) {
+        return postsRepository.findPostDetailById(postId)
+                .orElseThrow(() -> new ApplicationException(POST_INTERNAL_ERROR));
+    }
 }

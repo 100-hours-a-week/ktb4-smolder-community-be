@@ -1,9 +1,11 @@
 package com.dragoncommunity.domain.post.controller;
 
 import com.dragoncommunity.common.dto.ApiResponse;
+import com.dragoncommunity.common.exception.ApplicationException;
 import com.dragoncommunity.domain.post.dto.request.CreatePostRequestDto;
 import com.dragoncommunity.domain.post.dto.request.GetPostsRequestDto;
 import com.dragoncommunity.domain.post.dto.request.ModifyPostRequestDto;
+import com.dragoncommunity.domain.post.dto.response.GetPostDetailResponseDto;
 import com.dragoncommunity.domain.post.dto.response.GetPostResponseDto;
 import com.dragoncommunity.domain.post.service.PostsService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.AUTHORIZATION_HEADER_MISSING_OR_INVALID;
 import static com.dragoncommunity.domain.post.constant.SuccessMessage.*;
 
 @RestController
@@ -52,7 +55,19 @@ public class PostsController {
         return ApiResponse.of(POST_MODIFY_SUCCESS);
     }
 
-    private Long extractUserId(HttpServletRequest request){
-        return (Long) request.getAttribute("userId");
+    /**
+     * 게시글 상세 조회  API
+     */
+    @GetMapping("/{post_id}")
+    public ApiResponse<GetPostDetailResponseDto> getPostDetail(@PathVariable("post_id") Long postId){
+        return ApiResponse.of(POST_DETAIL_LOAD_SUCCESS, postsService.getPostDetail(postId));
+    }
+
+    private Long extractUserId(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        if( userId== null){
+            throw new ApplicationException(AUTHORIZATION_HEADER_MISSING_OR_INVALID);
+        }
+        return userId;
     }
 }
