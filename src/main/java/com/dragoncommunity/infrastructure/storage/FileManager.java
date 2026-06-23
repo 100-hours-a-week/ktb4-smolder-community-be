@@ -10,4 +10,6 @@ public interface FileManager {
     String postImageUpload(MultipartFile file);
 
     void validatePostImageExists(String profileImageUrl);
+
+    void postImageDelete(String postImageUrl);
 }

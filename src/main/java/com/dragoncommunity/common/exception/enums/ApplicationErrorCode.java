@@ -18,9 +18,13 @@ public enum ApplicationErrorCode implements ErrorCode {
     AUTHORIZATION_HEADER_MISSING_OR_INVALID(HttpStatus.UNAUTHORIZED,"인증 정보가 없거나 형식이 올바르지 않습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED,"인증 정보가 올바르지 않습니다."),
     AUTH_INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED,"아이디 또는 비밀번호가 올바르지 않습니다."),
-    USER_NOT_EXIST(HttpStatus.UNAUTHORIZED,"유저 정보가 존재하지 않습니다.")
-    ;
+    USER_NOT_EXIST(HttpStatus.UNAUTHORIZED,"유저 정보가 존재하지 않습니다."),
+    POST_NOT_EXIST(HttpStatus.BAD_REQUEST,"게시글 정보가 존재하지 않습니다."),
+    UNAUTHORIZED_RESOURCE(HttpStatus.UNAUTHORIZED,"접근 권한이 없습니다."),
+    FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"파일 삭제를 실패했습니다."),
+    POST_IMAGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR,"업로드된 게시글 이미지가 존재하지 않습니다.")
 
+    ;
     private final HttpStatus httpStatus;
     private final String message;
 }

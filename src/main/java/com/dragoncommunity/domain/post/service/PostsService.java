@@ -7,6 +7,7 @@ import com.dragoncommunity.domain.image.repository.ImagesRepository;
 import com.dragoncommunity.domain.post.dto.PostInfoDto;
 import com.dragoncommunity.domain.post.dto.request.CreatePostRequestDto;
 import com.dragoncommunity.domain.post.dto.request.GetPostsRequestDto;
+import com.dragoncommunity.domain.post.dto.request.ModifyPostRequestDto;
 import com.dragoncommunity.domain.post.dto.response.GetPostResponseDto;
 import com.dragoncommunity.domain.post.model.Posts;
 import com.dragoncommunity.domain.post.model.PostsImages;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.*;
 import static com.dragoncommunity.domain.post.constant.PostConstant.DEFAULT_POST_GET_SIZE;
@@ -64,7 +66,7 @@ public class PostsService {
             fileManager.validatePostImageExists(postImagePath);
 
             image = imagesRepository.findByImageUrl(postImagePath)
-                    .orElseThrow(() -> new ApplicationException(PROFILE_IMAGE_NOT_FOUND));
+                    .orElseThrow(() -> new ApplicationException(POST_IMAGE_NOT_FOUND));
 
             if (postsImagesRepository.existsByImage(image)) {
                 throw new ApplicationException(FILE_UPLOAD_FAILED);
@@ -110,6 +112,96 @@ public class PostsService {
         Long nextCursorId = contents.isEmpty() ? null : contents.get(contents.size() - 1).postId();
 
         return GetPostResponseDto.of(contents, nextCursorId, hasNext);
+    }
+
+    /**
+     * 게시글 수정 서비스
+     * 1. 게시글 유저 정보와 유저 정보가 일치하는지 확인
+     * 2. 게시글 엔티티 변경
+     * 3. 게시글 첨부파일 CASE에 따라 분기하여 추가 변경 삭제 현상유지
+     */
+    public void modifyPost(ModifyPostRequestDto modifyPostRequestDto, Long userId, Long postId) {
+
+        Users user = usersRepository.findByUserId(userId)
+                .orElseThrow(() -> new ApplicationException(USER_NOT_EXIST));
+
+        Posts post = postsRepository.findByPostId(postId)
+                .orElseThrow(() -> new ApplicationException(POST_NOT_EXIST));
+
+        if (!post.getUser().getUserId().equals(user.getUserId())) {
+            throw new ApplicationException(UNAUTHORIZED_RESOURCE);
+        }
+
+        post.modify(modifyPostRequestDto.title(), modifyPostRequestDto.content());
+
+        Optional<PostsImages> beforePostImage = postsImagesRepository.findByPost(post);
+
+        /**
+         *  case 1 : 게시글 수정 이전 이후 둘 다 첨부파일이 존재하지 않는 경우 -> 종료
+         *  case 2 : 전에 첨부파일이 없었다가 수정 후 첨부파일이 생긴 경우 -> 추가
+         *  case 3 : 전에 첨부파일이 있었다가 수정 후 첨부파일이 없어진 경우 -> 삭제
+         *  case 4 : 전에 첨부파일이 있었다가 수정 후 첨부파일이 변경된 경우 -> 변경
+         *  case 5 : 게시글 수정 이전 이후 첨부파일이 같은 경우 -> 종료
+         */
+
+        if (beforePostImage.isEmpty() && modifyPostRequestDto.postImageUrl() != null) {
+            // 전에 첨부파일이 없었다가 수정 후 첨부파일이 생긴 경우
+            Images newImage;
+
+            String newPostImagePath = FileUtil.extractPathFromUrl(modifyPostRequestDto.postImageUrl());
+
+            fileManager.validatePostImageExists(newPostImagePath);
+
+            newImage = imagesRepository.findByImageUrl(newPostImagePath)
+                    .orElseThrow(() -> new ApplicationException(POST_IMAGE_NOT_FOUND));
+
+            if (postsImagesRepository.existsByImage(newImage)) {
+                throw new ApplicationException(FILE_UPLOAD_FAILED);
+            }
+
+            postsImagesRepository.save(PostsImages.createPostsImages(post, newImage));
+
+        } else if (beforePostImage.isPresent() && modifyPostRequestDto.postImageUrl() == null) {
+            // 전에 첨부파일이 있었다가 수정 후 첨부파일이 없어진 경우
+            Images beforeImage;
+
+            String beforePostImagePath = FileUtil.extractPathFromUrl(beforePostImage.get().getImage().getImageUrl());
+
+            beforeImage = imagesRepository.findByImageUrl(beforePostImagePath)
+                    .orElseThrow(() -> new ApplicationException(POST_IMAGE_NOT_FOUND));
+
+            postsImagesRepository.delete(beforePostImage.get());
+
+            imagesRepository.delete(beforeImage);
+
+            fileManager.postImageDelete(beforePostImagePath);
+        } else if (beforePostImage.isPresent() && !beforePostImage.get().getImage().getImageUrl().equals(modifyPostRequestDto.postImageUrl())) {
+            // 전에 첨부파일이 있었다가 수정 후 첨부파일이 변경된 경우
+
+            System.out.println("1");
+
+            Images newImage, beforeImage;
+            beforeImage = beforePostImage.get().getImage();
+
+            String beforePostImagePath = FileUtil.extractPathFromUrl(beforePostImage.get().getImage().getImageUrl());
+            String newPostImagePath = FileUtil.extractPathFromUrl(modifyPostRequestDto.postImageUrl());
+
+            newImage = imagesRepository.findByImageUrl(newPostImagePath)
+                    .orElseThrow(() -> new ApplicationException(POST_IMAGE_NOT_FOUND));
+
+            fileManager.validatePostImageExists(newPostImagePath);
+
+            if (postsImagesRepository.existsByImage(newImage)) {
+                throw new ApplicationException(FILE_UPLOAD_FAILED);
+            }
+
+            imagesRepository.delete(beforeImage);
+
+            beforePostImage.get().modify(newImage);
+
+            fileManager.postImageDelete(beforePostImagePath);
+        }
+
     }
 
 }

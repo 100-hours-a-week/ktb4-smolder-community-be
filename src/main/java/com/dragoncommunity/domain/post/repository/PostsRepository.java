@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PostsRepository extends JpaRepository<Posts, Long> {
 
@@ -28,4 +30,6 @@ public interface PostsRepository extends JpaRepository<Posts, Long> {
             "WHERE p.postId < :lastSeenId " +
             "ORDER BY p.postId DESC")
     Slice<PostInfoDto> findNextPage(@Param("lastSeenId") Long lastSeenId, Pageable pageable);
+
+    Optional<Posts> findByPostId(Long postId);
 }

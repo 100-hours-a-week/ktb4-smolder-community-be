@@ -3,6 +3,7 @@ package com.dragoncommunity.domain.post.controller;
 import com.dragoncommunity.common.dto.ApiResponse;
 import com.dragoncommunity.domain.post.dto.request.CreatePostRequestDto;
 import com.dragoncommunity.domain.post.dto.request.GetPostsRequestDto;
+import com.dragoncommunity.domain.post.dto.request.ModifyPostRequestDto;
 import com.dragoncommunity.domain.post.dto.response.GetPostResponseDto;
 import com.dragoncommunity.domain.post.service.PostsService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,8 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static com.dragoncommunity.domain.post.constant.SuccessMessage.POSTS_LOAD_SUCCESS;
-import static com.dragoncommunity.domain.post.constant.SuccessMessage.POST_UPLOAD_SUCCESS;
+import static com.dragoncommunity.domain.post.constant.SuccessMessage.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +38,18 @@ public class PostsController {
     @GetMapping
     public ApiResponse<GetPostResponseDto> getPosts(@ModelAttribute GetPostsRequestDto getPostsRequestDto){
         return ApiResponse.of(POSTS_LOAD_SUCCESS,postsService.getPosts(getPostsRequestDto));
+    }
+
+    /**
+     * 게시글 수정 API
+     */
+    @PatchMapping("/{post_id}")
+    public ApiResponse<Void> modifyPost(@PathVariable("post_id") Long postId,
+                                        @RequestBody ModifyPostRequestDto modifyPostRequestDto,
+                                        HttpServletRequest request){
+        postsService.modifyPost(modifyPostRequestDto,extractUserId(request),postId);
+
+        return ApiResponse.of(POST_MODIFY_SUCCESS);
     }
 
     private Long extractUserId(HttpServletRequest request){

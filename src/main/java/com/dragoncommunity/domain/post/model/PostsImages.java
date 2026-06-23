@@ -36,6 +36,11 @@ public class PostsImages {
         return new PostsImages(post, image);
     }
 
+    public void modify(Images image){
+        this.image = image;
+        this.id = new PostsImagesId(post.getPostId(), image.getImageId());
+    }
+
     @Embeddable
     @EqualsAndHashCode
     @NoArgsConstructor(access = AccessLevel.PROTECTED)

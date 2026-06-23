@@ -95,6 +95,22 @@ public class LocalFileManager implements FileManager {
     }
 
     /**
+     * 로컬 저장공간에서 파일을 삭제한다.
+     */
+    @Override
+    public void postImageDelete(String postImagePath) {
+        Path filePath = POST_IMAGE_DIR.resolve(postImagePath);
+
+        try {
+            if (Files.isRegularFile(filePath)) {
+                Files.delete(filePath);
+            }
+        } catch (IOException exception) {
+            throw new ApplicationException(FILE_UPLOAD_FAILED);
+        }
+    }
+
+    /**
      * 파일 이름을 생성한다.
      */
     private String generateFilename(MultipartFile file,String prefix) {
