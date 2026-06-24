@@ -13,8 +13,10 @@ import com.dragoncommunity.domain.auth.repository.RefreshTokensRepository;
 import com.dragoncommunity.domain.user.model.Users;
 import com.dragoncommunity.domain.user.repository.UsersImagesRepository;
 import com.dragoncommunity.domain.user.repository.UsersRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -167,6 +169,49 @@ public class AuthService {
                 .findByRefreshToken(deleteAuthTokenRequestDto.refreshToken());
 
         refreshTokensRepository.delete(savedRefreshToken);
+    }
+
+
+    /**
+     * 유저 정보 조회 서비스
+     * Header 에서 엑세스 토큰을 검증하고 해당 토큰에 대한 유저 정보를 반환한다.
+     */
+    @Transactional
+    public UserInfoDto getAuthInfo(HttpServletRequest httpServletRequest) {
+
+        Long userId;
+
+        try{
+            String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                throw new ApplicationException(AUTHORIZATION_HEADER_MISSING_OR_INVALID);
+            }
+            String token = authHeader.substring(7);
+
+            if (!jwtProvider.isAccessToken(token)) {
+                throw new ApplicationException(INVALID_TOKEN);
+            }
+
+            userId = jwtProvider.getUserId(token);
+        }catch(ApplicationException e){
+            throw new ApplicationException(e.getErrorCode());
+        } catch (Exception e) {
+            throw new ApplicationException(INVALID_TOKEN);
+        }
+
+        Users user = usersRepository.findByUserId(userId)
+                .orElseThrow(() -> new ApplicationException(AUTH_INVALID_CREDENTIALS));
+
+        String profileImageUrl =  usersImagesRepository.findByUser(user).
+                map(ui -> ui.getImage().getImageUrl())
+                .orElse(null);
+
+        return UserInfoDto.of(
+                user.getEmail(),
+                user.getNickname(),
+                profileImageUrl
+        );
     }
 
 

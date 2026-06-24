@@ -1,14 +1,17 @@
 package com.dragoncommunity.domain.auth.controller;
 
 import com.dragoncommunity.common.dto.ApiResponse;
+import com.dragoncommunity.common.util.SecurityContextUtil;
 import com.dragoncommunity.domain.auth.dto.AccessTokenInfoDto;
 import com.dragoncommunity.domain.auth.dto.ReissueTokenResult;
 import com.dragoncommunity.domain.auth.dto.SignInResultDto;
+import com.dragoncommunity.domain.auth.dto.UserInfoDto;
 import com.dragoncommunity.domain.auth.dto.request.DeleteAuthTokenRequestDto;
 import com.dragoncommunity.domain.auth.dto.request.ReissueTokenRequestDto;
 import com.dragoncommunity.domain.auth.dto.request.SignInRequestDto;
 import com.dragoncommunity.domain.auth.dto.response.SignInResponseDto;
 import com.dragoncommunity.domain.auth.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -84,6 +87,14 @@ public class AuthController {
         addHttpOnlyCookie(httpServletResponse, DEVICE_ID_COOKIE_NAME, null, 0);
 
         return ApiResponse.of(SIGN_OUT_SUCCESS);
+    }
+
+    /**
+     * 유저 인증 정보 조회
+     */
+    @GetMapping
+    public ApiResponse<UserInfoDto> getAuth(HttpServletRequest httpServletRequest){
+        return ApiResponse.of(GET_AUTH_SUCCESS, authService.getAuthInfo(httpServletRequest));
     }
 
     private void addHttpOnlyCookie(HttpServletResponse response, String name, String value, long maxAge) {
