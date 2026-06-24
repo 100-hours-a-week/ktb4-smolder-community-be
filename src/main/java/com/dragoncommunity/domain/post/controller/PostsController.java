@@ -1,7 +1,7 @@
 package com.dragoncommunity.domain.post.controller;
 
 import com.dragoncommunity.common.dto.ApiResponse;
-import com.dragoncommunity.common.exception.ApplicationException;
+import com.dragoncommunity.common.util.SecurityContextUtil;
 import com.dragoncommunity.domain.post.dto.request.CreatePostRequestDto;
 import com.dragoncommunity.domain.post.dto.request.GetPostsRequestDto;
 import com.dragoncommunity.domain.post.dto.request.ModifyPostRequestDto;
@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.AUTHORIZATION_HEADER_MISSING_OR_INVALID;
 import static com.dragoncommunity.domain.post.constant.SuccessMessage.*;
 
 @RestController
@@ -29,7 +28,7 @@ public class PostsController {
      */
     @PostMapping
     public ApiResponse<Void> createPost(@Valid @RequestBody CreatePostRequestDto createPostRequestDto, HttpServletRequest request){
-        postsService.createPost(createPostRequestDto, extractUserId(request));
+        postsService.createPost(createPostRequestDto, SecurityContextUtil.extractUserId((request)));
 
         return ApiResponse.of(POST_UPLOAD_SUCCESS);
     }
@@ -50,7 +49,7 @@ public class PostsController {
     public ApiResponse<Void> modifyPost(@PathVariable("post_id") Long postId,
                                         @RequestBody ModifyPostRequestDto modifyPostRequestDto,
                                         HttpServletRequest request){
-        postsService.modifyPost(modifyPostRequestDto,extractUserId(request),postId);
+        postsService.modifyPost(modifyPostRequestDto,SecurityContextUtil.extractUserId(request),postId);
 
         return ApiResponse.of(POST_MODIFY_SUCCESS);
     }
@@ -63,11 +62,4 @@ public class PostsController {
         return ApiResponse.of(POST_DETAIL_LOAD_SUCCESS, postsService.getPostDetail(postId));
     }
 
-    private Long extractUserId(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
-        if( userId== null){
-            throw new ApplicationException(AUTHORIZATION_HEADER_MISSING_OR_INVALID);
-        }
-        return userId;
-    }
 }
