@@ -16,7 +16,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.dragoncommunity.domain.auth.constant.AuthConstant.*;
@@ -34,7 +36,7 @@ public class AuthController {
      * 2. device id, refresh token을 쿠키에 저장
      */
     @PostMapping
-    public ApiResponse<SignInResponseDto> createAuth(
+    public ResponseEntity<ApiResponse<SignInResponseDto>>createAuth(
             @Valid @RequestBody
             SignInRequestDto signInRequestDto,
             HttpServletResponse httpServletResponse){
@@ -45,7 +47,9 @@ public class AuthController {
         addHttpOnlyCookie(httpServletResponse, DEVICE_ID_COOKIE_NAME,
                 signInResultDto.refreshTokenInfoDto().deviceId(), DEVICE_ID_COOKIE_AGE);
 
-        return ApiResponse.of(SIGN_IN_SUCCESS, signInResultDto.signInResponseDto());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of(SIGN_IN_SUCCESS, signInResultDto.signInResponseDto()));
     }
 
     /**
@@ -54,7 +58,7 @@ public class AuthController {
      * 2. 기존 device id, 새로운 refresh token을 덮어씌움
      */
     @PutMapping
-    public ApiResponse<AccessTokenInfoDto> reissueAuth(
+    public ResponseEntity<ApiResponse<AccessTokenInfoDto>> reissueAuth(
             @CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false)
             String refreshToken,
             @CookieValue(name = DEVICE_ID_COOKIE_NAME, required = false)
@@ -67,7 +71,9 @@ public class AuthController {
         addHttpOnlyCookie(httpServletResponse, DEVICE_ID_COOKIE_NAME,
                 reissueTokenResult.refreshTokenInfoDto().deviceId(), DEVICE_ID_COOKIE_AGE);
 
-        return ApiResponse.of(TOKEN_REISSUE_SUCCESS, reissueTokenResult.accessTokenInfoDto());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of(TOKEN_REISSUE_SUCCESS, reissueTokenResult.accessTokenInfoDto()));
     }
 
     /**
@@ -76,7 +82,7 @@ public class AuthController {
      * 2. 쿠키값 삭제
      */
     @DeleteMapping
-    public ApiResponse<Void> deleteAuth(
+    public ResponseEntity<ApiResponse<Void>> deleteAuth(
             @CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false)
             String refreshToken,
             HttpServletResponse httpServletResponse){
@@ -86,15 +92,19 @@ public class AuthController {
         addHttpOnlyCookie(httpServletResponse, REFRESH_TOKEN_COOKIE_NAME, null, 0);
         addHttpOnlyCookie(httpServletResponse, DEVICE_ID_COOKIE_NAME, null, 0);
 
-        return ApiResponse.of(SIGN_OUT_SUCCESS);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body(ApiResponse.of(SIGN_OUT_SUCCESS));
     }
 
     /**
      * 유저 인증 정보 조회
      */
     @GetMapping
-    public ApiResponse<UserInfoDto> getAuth(HttpServletRequest httpServletRequest){
-        return ApiResponse.of(GET_AUTH_SUCCESS, authService.getAuthInfo(httpServletRequest));
+    public ResponseEntity<ApiResponse<UserInfoDto>> getAuth(HttpServletRequest httpServletRequest){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of(GET_AUTH_SUCCESS, authService.getAuthInfo(httpServletRequest)));
     }
 
     private void addHttpOnlyCookie(HttpServletResponse response, String name, String value, long maxAge) {

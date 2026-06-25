@@ -6,6 +6,8 @@ import com.dragoncommunity.domain.image.dto.response.PostImageUploadResponseDto;
 import com.dragoncommunity.domain.image.dto.response.ProfileUploadResponseDto;
 import com.dragoncommunity.domain.image.service.ImagesService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,21 +29,27 @@ public class ImagesController {
     private final ImagesService imagesService;
 
     @PostMapping("/post")
-    public ApiResponse<PostImageUploadResponseDto> createPostImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse<PostImageUploadResponseDto>> createPostImage(@RequestParam("file") MultipartFile file) {
         imageAvailabilityCheck(file);
 
-        return ApiResponse.of(
-                FILE_UPLOAD_SUCCESS,
-                PostImageUploadResponseDto.from(imagesService.createPostImage(file)));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of(
+                    FILE_UPLOAD_SUCCESS,
+                    PostImageUploadResponseDto.from(imagesService.createPostImage(file)
+                    )));
     }
 
     @PostMapping
-    public ApiResponse<ProfileUploadResponseDto> createProfileImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse<ProfileUploadResponseDto>> createProfileImage(@RequestParam("file") MultipartFile file) {
         imageAvailabilityCheck(file);
 
-        return ApiResponse.of(
-                FILE_UPLOAD_SUCCESS,
-                ProfileUploadResponseDto.from(imagesService.createUserProfileImage(file)));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of(
+                        FILE_UPLOAD_SUCCESS,
+                        ProfileUploadResponseDto.from(imagesService.createUserProfileImage(file)
+                        )));
     }
 
     /**

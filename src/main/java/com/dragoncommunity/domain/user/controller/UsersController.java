@@ -9,6 +9,8 @@ import com.dragoncommunity.domain.user.dto.response.AvailabilityResponseDto;
 import com.dragoncommunity.domain.user.service.UsersService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.dragoncommunity.common.exception.enums.ApplicationErrorCode.PASSWORD_PASSWORD_CONFIRM_MISMATCH;
@@ -22,34 +24,40 @@ public class UsersController {
     private final UsersService usersService;
 
     @GetMapping("/nickname/availability")
-    public ApiResponse<AvailabilityResponseDto> getNickNameAvailability(
+    public ResponseEntity<ApiResponse<AvailabilityResponseDto>> getNickNameAvailability(
             @Valid @ModelAttribute NicknameAvailabilityRequestDto nicknameAvailabilityRequestDto) {
         Boolean availability = usersService.nicknameAvailability(nicknameAvailabilityRequestDto);
 
-        return ApiResponse.of(
-                availability ? NICKNAME_AVAILABLE : NICKNAME_NOT_AVAILABLE,
-                AvailabilityResponseDto.of(availability)
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of(
+                        availability ? NICKNAME_AVAILABLE : NICKNAME_NOT_AVAILABLE,
+                        AvailabilityResponseDto.of(availability)
+                ));
     }
 
     @GetMapping("/email/availability")
-    public ApiResponse<AvailabilityResponseDto> getEmailAvailability(
+    public ResponseEntity<ApiResponse<AvailabilityResponseDto>> getEmailAvailability(
             @Valid @ModelAttribute EmailAvailabilityRequestDto emailAvailabilityRequestDto) {
         Boolean availability = usersService.emailAvailability(emailAvailabilityRequestDto);
 
-        return ApiResponse.of(
-                availability ? EMAIL_AVAILABLE : EMAIL_NOT_AVAILABLE,
-                AvailabilityResponseDto.of(availability)
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        ApiResponse.of(
+                                availability ? EMAIL_AVAILABLE : EMAIL_NOT_AVAILABLE,
+                                AvailabilityResponseDto.of(availability)));
     }
 
     @PostMapping
-    public ApiResponse<Void> createUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> createUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto) {
         passwordAndPasswordConfirmMatchCheck(signUpRequestDto);
 
         usersService.signUp(signUpRequestDto);
 
-        return ApiResponse.of(USER_SIGNUP_SUCCESS);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of(USER_SIGNUP_SUCCESS));
     }
 
     /**
