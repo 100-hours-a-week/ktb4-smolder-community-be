@@ -26,3 +26,15 @@ jwt:
   access-token-expired-seconds: 3600
   refresh-token-expired-seconds: 604800
   secret: ${JWT_SECRET}
+
+cors:
+  allowed-origins:
+    - "${CORS_ALLOWED_ORIGIN:http://localhost:3000}"
+  allowed-methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  allowed-pattern: "${CORS_ALLOWED_PATTERN:/**}"
+  allow-credentials: true
