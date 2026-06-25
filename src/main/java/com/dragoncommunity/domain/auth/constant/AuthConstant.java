@@ -3,6 +3,7 @@ package com.dragoncommunity.domain.auth.constant;
 public final class AuthConstant {
     public static final String[] WHITE_LIST = {
             "/auth",
+            "/user/**",
             "/user",
             "/image",
             "/public/profile/**",
