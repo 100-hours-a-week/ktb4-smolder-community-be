@@ -49,7 +49,7 @@ public class AuthService {
      * 7. DB에 저장
      */
     @Transactional
-    public SignInResultDto createAuthToken(@Valid SignInRequestDto signInRequestDto) {
+    public SignInResultDto createAuthToken(@Valid SignInRequestDto signInRequestDto,String deviceId) {
         Users user = usersRepository.findByEmail(signInRequestDto.email())
                 .orElseThrow(() -> new ApplicationException(AUTH_INVALID_CREDENTIALS));
 
@@ -73,7 +73,11 @@ public class AuthService {
 
         clearOldestSessionIfExceeded(user);
 
-        String deviceId = generateDeviceId();
+        if(deviceId !=null && !deviceId.isEmpty()){
+            refreshTokensRepository.deleteByDeviceId(deviceId);
+        }
+
+        deviceId = generateDeviceId();
 
         refreshTokensRepository.save(
                 RefreshTokens.createRefreshToken(

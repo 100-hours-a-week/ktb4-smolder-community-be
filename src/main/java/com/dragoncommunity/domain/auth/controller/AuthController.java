@@ -39,8 +39,10 @@ public class AuthController {
     public ResponseEntity<ApiResponse<SignInResponseDto>>createAuth(
             @Valid @RequestBody
             SignInRequestDto signInRequestDto,
-            HttpServletResponse httpServletResponse){
-        SignInResultDto signInResultDto = authService.createAuthToken(signInRequestDto);
+            HttpServletResponse httpServletResponse,
+            @CookieValue(name = DEVICE_ID_COOKIE_NAME, required = false)
+            String deviceId){
+        SignInResultDto signInResultDto = authService.createAuthToken(signInRequestDto,deviceId);
 
         addHttpOnlyCookie(httpServletResponse, REFRESH_TOKEN_COOKIE_NAME,
                 signInResultDto.refreshTokenInfoDto().refreshToken(), REFRESH_TOKEN_COOKIE_AGE);
