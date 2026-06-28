@@ -16,18 +16,22 @@ import java.util.Optional;
 public interface PostsRepository extends JpaRepository<Posts, Long> {
 
     @Query("SELECT new com.dragoncommunity.domain.post.dto.PostInfoDto(" +
-            "       p.postId, u.nickname, p.title, s.viewCount, s.likeCount, s.commentCount, p.updatedAt) " +
+            "       p.postId, u.nickname, i.imageUrl, p.title, s.viewCount, s.likeCount, s.commentCount, p.updatedAt) " +
             "FROM Posts p " +
             "JOIN p.user u " +
             "JOIN PostsStats s ON p.postId = s.postId " +
+            "LEFT JOIN UsersImages ui ON u.userId = ui.user.userId " +
+            "LEFT JOIN ui.image i " +
             "ORDER BY p.postId DESC")
     Slice<PostInfoDto> findFirstPage(Pageable pageable);
 
     @Query("SELECT new com.dragoncommunity.domain.post.dto.PostInfoDto(" +
-            "       p.postId, u.nickname, p.title, s.viewCount, s.likeCount, s.commentCount, p.updatedAt) " +
+            "       p.postId, u.nickname, i.imageUrl, p.title, s.viewCount, s.likeCount, s.commentCount, p.updatedAt) " +
             "FROM Posts p " +
             "JOIN p.user u " +
             "JOIN PostsStats s ON p.postId = s.postId " +
+            "LEFT JOIN UsersImages ui ON u.userId = ui.user.userId " +
+            "LEFT JOIN ui.image i " +
             "WHERE p.postId < :lastSeenId " +
             "ORDER BY p.postId DESC")
     Slice<PostInfoDto> findNextPage(@Param("lastSeenId") Long lastSeenId, Pageable pageable);
