@@ -1,5 +1,5 @@
 # 1. 빌드 스테이지
-FROM eclipse-temurin:17-jdk-alpine-3.23 AS builder
+FROM bellsoft/liberica-openjdk-alpine:17.0.19-cds AS builder
 WORKDIR /app
 
 # 빌드에 필요한 Gradle 기본 환경 파일 설정 복사
@@ -18,7 +18,7 @@ RUN mkdir extracted && \
     java -Djarmode=layertools -jar build/libs/*.jar extract --destination extracted
 
 # 2. 실행 스테이지
-FROM eclipse-temurin:17-jre-alpine-3.23
+FROM bellsoft/liberica-openjre-alpine:17.0.19-cds
 WORKDIR /app
 
 # 컨테이너 내부에서 사용할 사용자 계정, 그룹 생성
