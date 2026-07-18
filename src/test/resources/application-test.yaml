@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER}
+
+  servlet:
+    multipart:
+      max-file-size: ${SERVLET_MULTIPART_MAX_FILE_SIZE}
+      max-request-size: ${SERVLET_MULTIPART_MAX_REQUEST_SIZE}
+
+jwt:
+  access-token-expired-seconds: ${JWT_ACCESS_TOKEN_EXPIRED_SECONDS}
+  refresh-token-expired-seconds: ${JWT_REFRESH_TOKEN_EXPIRED_SECONDS}
+  secret: ${JWT_SECRET}
+
+cors:
+  allowed-origins:
+    - ${CORS_ALLOWED_ORIGIN}
+  allowed-methods: ${CORS_ALLOWED_METHODS}
+  allowed-pattern: ${CORS_ALLOWED_PATTERN}
+  allow-credentials: ${CORS_ALLOW_CREDENTIALS}
