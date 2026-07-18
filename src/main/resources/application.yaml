@@ -1,40 +1,5 @@
 spring:
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-
-jwt:
-  access-token-expired-seconds: 3600
-  refresh-token-expired-seconds: 604800
-  secret: ${JWT_SECRET}
-
-cors:
-  allowed-origins:
-    - "${CORS_ALLOWED_ORIGIN:http://localhost:3000}"
-  allowed-methods:
-    - "GET"
-    - "POST"
-    - "PUT"
-    - "DELETE"
-    - "OPTIONS"
-  allowed-pattern: "${CORS_ALLOWED_PATTERN:/**}"
-  allow-credentials: true
+  profiles:
+    active: local
+  config:
+    import: "file:.env[.properties]"
