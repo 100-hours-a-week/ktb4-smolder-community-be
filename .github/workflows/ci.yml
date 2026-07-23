@@ -1,0 +1,48 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test:
+    name: Test Build & Verify
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a
+        with:
+          java-version: '17.0.19'
+          distribution: 'liberica'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92
+
+      - name: Setup .env.test with Masking
+        env:
+          ENV_TEST_BASE64: ${{ secrets.ENV_TEST_FILE }}
+        run: |
+          printf '%s' "$ENV_TEST_BASE64" | base64 --decode > .env.test
+          while IFS= read -r line || [ -n "$line" ]; do
+            if [[ -n "$line" && ! "$line" =~ ^[[:space:]]*# ]]; then
+              value="${line#*=}"
+              if [ -n "$value" ]; then
+                echo "::add-mask::$value"
+              fi
+            fi
+          done < .env.test
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run Test
+        run: ./gradlew test --build-cache
+
+      - name: Run Build
+        run: ./gradlew build --build-cache -x test
