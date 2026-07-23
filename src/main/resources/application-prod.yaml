@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: "file:.env.prod[.properties]"
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
