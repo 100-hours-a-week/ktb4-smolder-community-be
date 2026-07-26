@@ -1,18 +1,19 @@
 name: Continuous Integration
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [ "main" ]
 
 jobs:
-  build-test:
-    name: Test Build & Verify
+  test-and-build:
+    name: CI workflows
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 1
 
       - name: Set up JDK
@@ -28,6 +29,11 @@ jobs:
         env:
           ENV_TEST_BASE64: ${{ secrets.ENV_TEST_FILE }}
         run: |
+          if [ -z "$ENV_TEST_BASE64" ]; then
+            echo "::error::secrets.ENV_TEST_FILE 이 비어있거나 불러올 수 없습니다."
+            exit 1
+          fi
+        
           printf '%s' "$ENV_TEST_BASE64" | base64 --decode > .env.test
           while IFS= read -r line || [ -n "$line" ]; do
             if [[ -n "$line" && ! "$line" =~ ^[[:space:]]*# ]]; then
