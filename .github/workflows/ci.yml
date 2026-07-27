@@ -1,7 +1,7 @@
 name: Continuous Integration
 
 on:
-  pull_request_target:
+  pull_request:
     branches: [ "main" ]
 
 jobs:
@@ -13,8 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          allow-unsafe-pr-checkout: true
           fetch-depth: 1
 
       - name: Set up JDK
