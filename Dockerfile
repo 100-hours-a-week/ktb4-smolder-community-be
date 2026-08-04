@@ -6,6 +6,8 @@ WORKDIR /app
 COPY gradle ./gradle
 COPY build.gradle settings.gradle gradlew ./
 
+RUN chmod +x gradlew
+
 # 소스 코드 복사
 COPY src/ src/
 
