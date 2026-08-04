@@ -1,12 +1,9 @@
 spring:
-  config:
-    import: "file:.env.test[.properties]"
-
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: ${DB_DRIVER}
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
 
   jpa:
     hibernate:
@@ -18,17 +15,17 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: ${SERVLET_MULTIPART_MAX_FILE_SIZE}
-      max-request-size: ${SERVLET_MULTIPART_MAX_REQUEST_SIZE}
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 jwt:
-  access-token-expired-seconds: ${JWT_ACCESS_TOKEN_EXPIRED_SECONDS}
-  refresh-token-expired-seconds: ${JWT_REFRESH_TOKEN_EXPIRED_SECONDS}
-  secret: ${JWT_SECRET}
+  access-token-expired-seconds: 3600
+  refresh-token-expired-seconds: 604800
+  secret: secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret
 
 cors:
   allowed-origins:
-    - ${CORS_ALLOWED_ORIGIN}
-  allowed-methods: ${CORS_ALLOWED_METHODS}
-  allowed-pattern: ${CORS_ALLOWED_PATTERN}
-  allow-credentials: ${CORS_ALLOW_CREDENTIALS}
+    - http://localhost:3000
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-pattern: /**
+  allow-credentials: true
