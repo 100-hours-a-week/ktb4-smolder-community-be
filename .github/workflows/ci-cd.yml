@@ -29,3 +29,22 @@ jobs:
 
       - name: Push Docker Image
         run: docker push $IMAGE
+
+      - name: Update Helm values image tag
+        run: |
+          sed -i "s|tag: .*|tag: ${GITHUB_SHA}|" ./deploy/helm/backend/values-dev.yaml
+
+      - name: Commit Helm values update
+        env:
+          GIT_USERNAME: ${{ vars.GIT_USERNAME }}
+          GIT_EMAIL: ${{ vars.GIT_EMAIL }}
+        run: |
+          git config user.name "$GIT_USERNAME"
+          git config user.email "$GIT_EMAIL"
+
+          git add ./deploy/helm/backend/values-dev.yaml
+
+          git diff --cached --quiet || (
+            git commit -m "chore: update image tag to ${{ github.sha }}" &&
+            git push
+          )
