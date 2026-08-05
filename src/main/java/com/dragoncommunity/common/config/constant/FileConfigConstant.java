@@ -14,14 +14,14 @@ public final class FileConfigConstant {
 
     public static final Path PROFILE_DIR = UPLOAD_FOLDER.resolve("profile");
 
-    public static final String PROFILE_URL = "/public/profile/";
+    public static final String PROFILE_URL = "/api/v1/public/profile/";
     public static final String PROFILE_IMAGE_PREFIX = "profile";
 
     public static final List<String> ALLOWED_IMAGE_EXTENSIONS = List.of("jpg", "jpeg", "png", "gif");
 
     public static final long MAX_PROFILE_SIZE = 10 * 1024 * 1024;
 
-    public static final String POST_IMAGE_URL = "/public/post/";
+    public static final String POST_IMAGE_URL = "/api/v1/public/post/";
     public static final String POST_IMAGE_PREFIX = "post";
 
     public static final Path POST_IMAGE_DIR = UPLOAD_FOLDER.resolve("post");
