@@ -11,6 +11,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
@@ -32,7 +35,7 @@ jobs:
 
       - name: Update Helm values image tag
         run: |
-          sed -i "s|tag: .*|tag: ${GITHUB_SHA}|" ./deploy/helm/backend/values-dev.yaml
+          sed -i "s|tag: .*|tag: ${{ github.sha }}|" ./deploy/helm/backend/values-dev.yaml
 
       - name: Commit Helm values update
         env:
@@ -46,5 +49,5 @@ jobs:
 
           git diff --cached --quiet || (
             git commit -m "chore: update image tag to ${{ github.sha }}" &&
-            git push
+            git push origin HEAD:${{ github.head_ref }}
           )
