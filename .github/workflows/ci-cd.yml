@@ -1,0 +1,50 @@
+name: ci-cd.yml
+on:
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  deploy:
+    name: CI CD workflows
+    runs-on: ubuntu-22.04-arm
+    env:
+      IMAGE: megazizon/ktb-community-backend:${{ github.sha }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            --platform linux/arm64 \
+            -t $IMAGE .
+
+      - name: Push Docker Image
+        run: docker push $IMAGE
+
+      - name: Update Helm values image tag
+        run: |
+          sed -i "s|tag: .*|tag: ${GITHUB_SHA}|" ./deploy/helm/backend/values-dev.yaml
+
+      - name: Commit Helm values update
+        env:
+          GIT_USERNAME: ${{ vars.GIT_USERNAME }}
+          GIT_EMAIL: ${{ vars.GIT_EMAIL }}
+        run: |
+          git config user.name "$GIT_USERNAME"
+          git config user.email "$GIT_EMAIL"
+
+          git add ./deploy/helm/backend/values-dev.yaml
+
+          git diff --cached --quiet || (
+            git commit -m "chore: update image tag to ${{ github.sha }}" &&
+            git push
+          )
