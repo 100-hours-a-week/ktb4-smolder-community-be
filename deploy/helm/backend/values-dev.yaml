@@ -34,7 +34,7 @@ replicaCount: 1
 
 image:
   repository: megazizon/ktb-community-backend
-  tag: b3c7f8dcbac85ed68e4f9bad16a64a5314ae81c8
+  tag: 6618462531c59c97d21303ed6e1a3c541f0a0326
   pullPolicy: Always
 
 resources:
