@@ -1,6 +1,6 @@
 name: ci-cd.yml
 on:
-  pull_request:
+  push:
     branches: [ "main" ]
 jobs:
   deploy:
@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.ref_name }}
           fetch-depth: 1
 
       - name: Set up Docker
@@ -49,5 +49,5 @@ jobs:
 
           git diff --cached --quiet || (
             git commit -m "chore: update image tag to ${{ github.sha }}" &&
-            git push origin HEAD:${{ github.head_ref }}
+            git push origin HEAD:${{ github.ref_name }}
           )
