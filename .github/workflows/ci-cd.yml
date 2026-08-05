@@ -1,6 +1,6 @@
 name: ci-cd.yml
 on:
-  push:
+  pull_request:
     branches: [ "main" ]
 jobs:
   deploy:
