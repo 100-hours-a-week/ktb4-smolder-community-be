@@ -32,6 +32,7 @@ COPY --from=builder --chown=smolder:smolder /app/extracted/spring-boot-loader/ .
 COPY --from=builder --chown=smolder:smolder /app/extracted/snapshot-dependencies/ ./
 COPY --from=builder --chown=smolder:smolder /app/extracted/application/ ./
 
+RUN chown -R smolder:smolder /app
 # 이후 실행할 명령어 계정 설정
 USER smolder
 
