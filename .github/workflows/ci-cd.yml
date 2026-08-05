@@ -2,6 +2,10 @@ name: ci-cd.yml
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'deploy/**'
+permissions:
+  contents: write
 jobs:
   deploy:
     name: CI CD workflows
