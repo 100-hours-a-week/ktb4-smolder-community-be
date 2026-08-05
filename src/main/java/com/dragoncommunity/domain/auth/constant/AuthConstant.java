@@ -8,6 +8,7 @@ public final class AuthConstant {
             "/image",
             "/public/profile/**",
             "/public/post/**",
+            "/health",
     };
 
     public static final Long DEVICE_ID_COOKIE_AGE = (long) (604800);
